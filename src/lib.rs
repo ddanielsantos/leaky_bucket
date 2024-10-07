@@ -38,21 +38,24 @@ impl LeakyBucket {
     }
 
     pub fn remaining_capacity(&mut self) -> u64 {
+        self.leak();
         self.capacity.saturating_sub(self.current_level)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use rand::prelude::*;
     use std::{thread, time};
 
     use super::*;
 
     #[test]
     fn it_works() {
-        let mut lbucket = LeakyBucket::new(0010, 05);
+        let mut lbucket = LeakyBucket::new(3, 1);
+        let mut rng = rand::thread_rng();
 
-        for x in 0..010 {
+        for x in 0..7 {
             let a = lbucket.add_event();
 
             if !a {
@@ -61,17 +64,17 @@ mod tests {
                 println!("ran {} remain {}", x, lbucket.remaining_capacity());
             }
 
-            thread::sleep(time::Duration::from_millis(010));
+            thread::sleep(time::Duration::from_millis(rng.gen_range(100..1000)));
         }
 
-        thread::sleep(time::Duration::from_millis(1000));
+        // thread::sleep(time::Duration::from_millis(1000));
 
-        let a = lbucket.add_event();
+        // let a = lbucket.add_event();
 
-        if !a {
-            println!("dropped remain {}", lbucket.remaining_capacity());
-        } else {
-            println!("ran remain {}", lbucket.remaining_capacity());
-        }
+        // if !a {
+        //     println!("dropped remain {}", lbucket.remaining_capacity());
+        // } else {
+        //     println!("ran remain {}", lbucket.remaining_capacity());
+        // }
     }
 }
